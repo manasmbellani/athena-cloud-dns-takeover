@@ -30,7 +30,7 @@ More info about these types of takeovers is described here:
 #                 set to 0 to only print.                                                           
 #                                                                                                   
 # Prints:                                                                                           
-#     Prints the vulnerable domains, and addiitonal logging if debug_flag is set                    
+#     Prints the vulnerable domains by default, and additional logging if debug_flag is set         
 #                                                                                                   
 # Input:                                                                                            
 #     Supply the list of domains as a file OR one per line to this script to check for vulnerability
