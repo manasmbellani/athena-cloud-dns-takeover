@@ -30,7 +30,7 @@ to exploit the vulnerability will also be added in the near future.
 #                                                                                                   
 # Args:                                                                                             
 #     debug_flag: Set to 1 for debugging and print additional output, 0 for debugging. By default,  
-#                 set to 0 to only print.                                                           
+#                 set to 0 to only print vulnerable domains.                                                           
 #                                                                                                   
 # Prints:                                                                                           
 #     Prints the vulnerable domains by default, and additional logging if debug_flag is set         
