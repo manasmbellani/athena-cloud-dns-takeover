@@ -17,20 +17,21 @@ to exploit the vulnerability will also be added in the near future.
 ### cloud_dns_takeover_check.sh
 
 ```
-# Script uses 'dig' installed to determine if DNS Subdomain takeover possible on Cloud providers    
-# such as AWS Route53 due to dangling DNS (non-existant) record sets, Digital Ocean, Google Cloud   
-# and others.                                                                                       
+# Script uses 'dig' locally installed command to determine if DNS Subdomain takeover possible on    
+# domains hosted with various Cloud providers such as AWS Route53 due to dangling DNS (non-existant) 
+# record sets, Digital Ocean, Google Cloud and others.                                              
 #                                                                                                   
 # Script locates authority nameservers for subdomain AND its parent domain, checking response       
-# provided when the subdomain is resolved through the authority nameserver. If a particular response
+# provided when the subdomain is resolved through each authority nameserver. If particular response 
 # returned such as SERVFAIL/REFUSED when querying the subdomain's nameserver and the parent domain's 
-# nameserver, then it is possible to takeover this subdomain by creating the same DNS recordset with 
-# the same Nameservers allocated through the cloud provider.                                        
+# nameserver, then it is possible to takeover this subdomain by creating the a new DNS recordset with 
+# one of the same authority nameservers allocated through the cloud provider for the newly created  
+# recordset.                                                                                        
 #                                                                                                   
 #                                                                                                   
 # Args:                                                                                             
 #     debug_flag: Set to 1 for debugging and print additional output, 0 for debugging. By default,  
-#                 set to 0 to only print vulnerable domains.                                                           
+#                 set to 0 to only print vulnerable domains.                                        
 #                                                                                                   
 # Prints:                                                                                           
 #     Prints the vulnerable domains by default, and additional logging if debug_flag is set         
@@ -47,5 +48,4 @@ to exploit the vulnerability will also be added in the near future.
 #                                                                                                   
 #     To check the domains from input and run checks in parallel using the parallel command:        
 #         cat input-domains.txt | parallel --will-cite --pipe -n1 ./vulscan_cloud_dns_takeover_check.sh
-#
 ```

@@ -5,10 +5,11 @@
 # record sets, Digital Ocean, Google Cloud and others.
 # 
 # Script locates authority nameservers for subdomain AND its parent domain, checking response 
-# provided when the subdomain is resolved through the authority nameserver. If a particular response
+# provided when the subdomain is resolved through each authority nameserver. If particular response
 # returned such as SERVFAIL/REFUSED when querying the subdomain's nameserver and the parent domain's 
-# nameserver, then it is possible to takeover this subdomain by creating the same DNS recordset with 
-# the same Nameservers allocated through the cloud provider. 
+# nameserver, then it is possible to takeover this subdomain by creating the a new DNS recordset with 
+# one of the same authority nameservers allocated through the cloud provider for the newly created
+# recordset.  
 #
 #
 # Args:
@@ -133,17 +134,22 @@ function get_nameservers_via_dig {
     fi
 }
 
-# Get a list of all the domains
+# Get a list of all the domains from user to check
 domains_to_check="$(cat -)"
-verbose=${1:-"0"}
-
-# Start with the DNS nameserver of Google, and a var to store the old nameserver
-nameserver="8.8.8.8"
-prev_level_nameserver=""
 
 # Start looping through each domain to check
 IFS=$'\n'
 for domain in $domains_to_check; do
+    
+    if [ "$DEBUG_FLAG" == "1" ]; then
+        # Display the domain we are checking for user's benefit
+        echo "[*] Checking domain: $domain"
+    fi
+
+    # Start with the DNS nameserver of Google, and a var to store the previous level nameservers
+    nameservers="8.8.8.8"
+    nameserver="8.8.8.8"
+    prev_level_nameservers=""
 
     # Start going through each level for the domain
     num_levels=$(get_num_levels_in_domain "$domain")
@@ -154,58 +160,74 @@ for domain in $domains_to_check; do
         # get the domain e.g. for www.google.com, level_no=1 is com., level_no=2 is google.com.
         domain_level=$(get_domain_level "$domain" "$level_no")
 
-        # Get the nameservers for this domain's level
+        # Get the nameservers for this domain's level and previous level's
+        prev_level_nameservers="$nameservers"
         nameservers=$(get_nameservers_via_dig "$domain_level" "$nameserver")
-
-        # Get a single nameserver for this domain_level and save the previous nameserver
-        prev_level_nameserver="$nameserver"
+    
+        # Get a single nameserver for resolution of previous level
         nameserver=$(echo "$nameservers" | head -n1)
         
         if [ "$DEBUG_FLAG" == "1" ]; then
             # DEBUG: Print domain_level, nameserver and prev level nameserver
-            echo "[*] domain_level: $domain_level, nameserver: $nameserver, prev_level_nameserver: $prev_level_nameserver"
+            echo "[*] domain_level: $domain_level, nameservers: $nameservers, prev_level_nameservers: $prev_level_nameservers"
         fi
 
         if [ -z "$nameserver" ]; then
             break
         fi
     done
+
+    # store dns resolution record results
+    dns_resolution=""
+    dns_resolution_prev_level=""
+    
+    # Check the authoritative nameservers for the current level
+    if [ ! -z "$nameservers" ]; then
+    
+        # Loop through each nameserver found
+        IFS=$'\n'
+        for nameserver in $nameservers; do
+            
+            # Now, perform A DNS resolution on the nameserver
+            dns_resolution=$(perform_dns_resolution_via_dig "$domain" "$nameserver" "A")
+    
+            if [ "$DEBUG_FLAG" == "1" ]; then
+                # DEBUG statement: Print domain level and the nameserver
+                echo "[*] domain_level: $domain_level, nameserver: $nameserver, dns_resolution: $dns_resolution"
+            fi
+    
+            # If unusual response like Server failure, then takeover possible
+            is_vulnerable=$(echo "$dns_resolution" | egrep -i "status" | egrep -i "$VULN_REGEX")
+            if [ ! -z "$is_vulnerable" ]; then
+                echo "[+] Vulnerable domain found. Domain: $domain, nameserver: $nameserver, domain_level: $domain_level"
+            fi  
+        done
+    fi
+    
+    # Check previous level's nameservers as well, if not empty
+    if [ ! -z "$prev_level_nameservers" ]; then
+        
+        # loop through each nameserver for previous level
+        IFS=$'\n'
+        for prev_level_nameserver in $prev_level_nameservers; do
+    
+            # Now, perform A DNS resolution on the nameserver
+            dns_resolution_prev_level=$(perform_dns_resolution_via_dig "$domain" \
+                                        "$prev_level_nameserver" "A")
+    
+            if [ "$DEBUG_FLAG" == "1" ]; then
+                # DEBUG: Print the domain level, previous level's nameserver and resolution using the 
+                # previous level's nameserver
+                echo "[*] domain: $domain, nameserver: $prev_level_nameserver, dns_resolution_prev_level: $dns_resolution_prev_level"
+            fi
+            
+            # If unusual response like Server failure, then takeover possible
+            is_vulnerable=$(echo "$dns_resolution_prev_level" | egrep -i "status" | egrep -i "$VULN_REGEX")
+            if [ ! -z "$is_vulnerable" ]; then
+                echo "[+] Vulnerable domain found. Domain: $domain, nameserver: $prev_level_nameserver, domain_level: $domain_level"
+            fi
+        done
+    fi
+
 done
 
-# store dns resolution record results
-dns_resolution=""
-dns_resolution_prev_level=""
-
-if [ ! -z "$nameserver" ]; then
-    # Now, perform A DNS resolution on the nameserver
-    dns_resolution=$(perform_dns_resolution_via_dig "$domain_level" "$nameserver" "A")
-
-    if [ "$DEBUG_FLAG" == "1" ]; then
-        # DEBUG statement: Print domain level and the nameserver
-        echo "[*] domain_level: $domain_level, nameserver: $nameserver, dns_resolution: $dns_resolution"
-    fi
-fi
-
-if [ ! -z "$prev_level_nameserver" ]; then
-    # Now, perform A DNS resolution on the nameserver
-    dns_resolution_prev_level=$(perform_dns_resolution_via_dig "$domain_level" \
-                                "$prev_level_nameserver" "A")
-
-    if [ "$DEBUG_FLAG" == "1" ]; then
-        # DEBUG: Print the domain level, previous level's nameserver and resolution using the 
-        # previous level's nameserver
-        echo "[*] domain_level: $domain_level, nameserver: $prev_level_nameserver, dns_resolution_prev_level: $dns_resolution_prev_level"
-    fi
-fi
-
-# If unusual response like Server failure, then takeover possible
-is_vulnerable=$(echo "$dns_resolution" | egrep -i "status" | egrep -i "$VULN_REGEX")
-if [ ! -z "$is_vulnerable" ]; then
-    echo "[+] Vulnerable domain found. Domain: $domain, nameserver: $nameserver, domain_level: $domain_level"
-fi
-
-# If unusual response like Server failure, then takeover possible
-is_vulnerable=$(echo "$dns_resolution_prev_level" | egrep -i "status" | egrep -i "$VULN_REGEX")
-if [ ! -z "$is_vulnerable" ]; then
-    echo "[+] Vulnerable domain found. Domain: $domain, nameserver: $prev_level_nameserver, domain_level: $domain_level"
-fi
