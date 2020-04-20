@@ -9,6 +9,9 @@ More info about these types of takeovers is described here:
 * https://0xpatrik.com/subdomain-takeover-ns/
 * https://thehackerblog.com/the-orphaned-internet-taking-over-120k-domains-via-a-dns-vulnerability-in-aws-google-cloud-rackspace-and-digital-ocean/
 
+Currently, this project only provides script(s) to check for DNS takeover vulnerability. PoC scripts 
+to exploit the vulnerability will also be added in the near future.
+
 ## Scripts
 
 ### cloud_dns_takeover_check.sh
