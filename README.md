@@ -11,7 +11,7 @@ More info about these types of takeovers is described here:
 
 ## Scripts
 
-* `cloud_dns_takeover_check`
+### cloud_dns_takeover_check.sh
 
 ```
 # Script uses 'dig' installed to determine if DNS Subdomain takeover possible on Cloud providers    
