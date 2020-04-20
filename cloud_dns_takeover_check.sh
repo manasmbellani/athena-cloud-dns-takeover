@@ -192,7 +192,8 @@ if [ ! -z "$prev_level_nameserver" ]; then
                                 "$prev_level_nameserver" "A")
 
     if [ "$DEBUG_FLAG" == "1" ]; then
-        # DEBUG: Uncomment for debugging the script
+        # DEBUG: Print the domain level, previous level's nameserver and resolution using the 
+        # previous level's nameserver
         echo "[*] domain_level: $domain_level, nameserver: $prev_level_nameserver, dns_resolution_prev_level: $dns_resolution_prev_level"
     fi
 fi
