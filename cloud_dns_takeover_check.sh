@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Script uses 'dig' installed to determine if DNS Subdomain takeover possible on Cloud providers
-# such as AWS Route53 due to dangling DNS (non-existant) record sets, Digital Ocean, Google Cloud
-# and others.
+# Script uses 'dig' locally installed command to determine if DNS Subdomain takeover possible on 
+# domains hosted with various Cloud providers such as AWS Route53 due to dangling DNS (non-existant) 
+# record sets, Digital Ocean, Google Cloud and others.
 # 
 # Script locates authority nameservers for subdomain AND its parent domain, checking response 
 # provided when the subdomain is resolved through the authority nameserver. If a particular response
