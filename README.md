@@ -49,3 +49,40 @@ to exploit the vulnerability will also be added in the near future.
 #     To check the domains from input and run checks in parallel using the parallel command:        
 #         cat input-domains.txt | parallel --will-cite --pipe -n1 ./vulscan_cloud_dns_takeover_check.sh
 ```
+
+### aws_route53_takeover_exploit.sh
+
+```
+# Script uses 'awscli' to exploit Route53 Dangling entries in hosted zones.                         
+#                                                                                                   
+# Script first checks whether a domain is vulnerable using the check script in the existing         
+# directory. If it is, then it will check if it has any AWS nameservers, extract these AWS authority 
+# nameservers, and then start creating hosted zones in Route53 using the profile credentials until  
+# it finds atleast one nameserver in the newly created hosted zone that matches the vulnerable      
+# authority nameserver.                                                                             
+#                                                                                                   
+# Once a valid hosted zone, it will now attempt to create a new A record pointing in the new hosted 
+# zone pointing to an IP of your choice.                                                            
+#                                                                                                   
+# Pre-requisites:                                                                                   
+#     Pre-requisites for the check script                                                           
+#     awscli                                                                                        
+#     AWS credentials, configured in ~/.aws/credentials, with access to Route53 to Get, List and    
+#         Create Hosted zones AND new DNS records                                                   
+#                                                                                                   
+# Args:                                                                                             
+#     domain: Domain to attempt to compromise                                                       
+#     aws_profile: Profile name in ~/.aws/credentials file                                          
+#     redirect_host: IP address to point to                                                         
+#     sleep_time: Time to sleep (in seconds)                                                        
+#                                                                                                   
+# Prints:                                                                                           
+#     Prints the debug log as it tries to created hosted zones, if it creates a hosted zone with    
+#     atleast one nameserver, it will report success AND also, create the A record describing it.   
+#                                                                                                   
+# Examples:                                                                                         
+#   To try to takeover the domain, test.some-domain.com, confirmed to be on vulnerable to AWS       
+#   Route53 for redirection to a random IP, 1.1.1.1 using 'default' AWS profile credentials:        
+#       ./aws_route53_takeover_exploit.sh test.some-domain.com default 1.1.1.1                      
+#
+```
