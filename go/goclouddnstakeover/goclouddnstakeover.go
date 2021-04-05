@@ -16,8 +16,6 @@ import (
 	"regexp"
 	"strings"
 	"sync"
-
-	//"github.com/lixiangzhong/dnsutil"
 )
 
 // NameServerRegex is used to extract the nameserver
