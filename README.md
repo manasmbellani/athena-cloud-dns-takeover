@@ -16,7 +16,7 @@ to exploit the vulnerability will also be added in the near future.
 
 ### Golang
 
-#### recon
+#### goclouddnstakeover
 Script can be used to identify if there any domains susceptible to Cloud DNS 
 takeover. The function is similar to the bash script described and relies on 
 the `dig` utility being installed on the device.
