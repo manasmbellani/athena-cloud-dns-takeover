@@ -14,7 +14,36 @@ to exploit the vulnerability will also be added in the near future.
 
 ## Scripts
 
-### cloud_dns_takeover_check.sh
+### Golang
+
+#### recon
+Script can be used to identify if there any domains susceptible to Cloud DNS 
+takeover. The function is similar to the bash script described and relies on 
+the `dig` utility being installed on the device.
+
+
+Examples:
+- Assuming we wish to check the following domains for vulnerability
+```
+$ cat /tmp/domains.txt
+www.qantas.com.au
+qantas.com.au
+www.msn.com
+mytestdomaindflkdflkalkad.com
+```
+
+Command to check the domains and output is as follows:
+```
+$ cat /tmp/test.txt | go run recon.go -q
+[goclouddnstakeover] domain: mytestdomaindflkdflkalkad.com, ns: ns-543.awsdns-03.net., status: REFUSED
+...
+```
+
+### Bash
+
+Bash scripts
+
+#### cloud_dns_takeover_check.sh
 
 ```
 # Script uses 'dig' locally installed command to determine if DNS Subdomain takeover possible on    
