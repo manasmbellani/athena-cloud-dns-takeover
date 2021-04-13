@@ -21,6 +21,14 @@ Script can be used to identify if there any domains susceptible to Cloud DNS
 takeover. The function is similar to the bash script described and relies on 
 the `dig` utility being installed on the device.
 
+To install dig, run the command:
+```
+# Linux
+sudo apt-get -y install dig
+
+# MAC
+brew install dig
+```
 
 Examples:
 - Assuming we wish to check the following domains for vulnerability
